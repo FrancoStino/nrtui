@@ -22,7 +22,7 @@ class MouseInput:
         self.handle = -1
         device_name = "event-mouse"
         for device in os.listdir("/dev/input/by-path/"):
-            if device[-device_name.__len__() :] == device_name:
+            if device.endswith(device_name):
                 self.handle = os.open("/dev/input/by-path/" + device, os.O_WRONLY)
                 return
         raise Exception("Input [" + device_name + "] not found!")
@@ -42,10 +42,6 @@ class MouseInput:
         libc.write(self.handle, pointer(start), sizeof(start))
         libc.write(self.handle, pointer(end), sizeof(end))
 
-    def move(self, y):
-        self.__send_input(0x02, 1, y)
-
-    def move_horizontal(self, x):
-        self.__send_input(
-            0x02, 0, x
-        )  # 0x02 è l'evento per movimento, 0 è il codice per l'asse X
+    def move(self, y, x=0):  # Aggiunto il parametro x per il movimento orizzontale
+        self.__send_input(0x02, 0, x)  # Codice 0 per il movimento orizzontale
+        self.__send_input(0x02, 1, y)  # Codice 1 per il movimento verticale

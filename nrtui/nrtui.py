@@ -46,61 +46,58 @@ class LeftSide(urwid.WidgetWrap):
     def __init__(self, save, save_as, delete):
         self.loop = Loop()
 
-        # Inizializzazione dei controlli esistenti
         self.activate = checkbox("enable no recoil", self.activate_l)
         self.ads = checkbox("require ads", self.ads_l)
         self.delay = urwid.numedit.FloatEdit("delay: ", "2")
         self.offset = urwid.numedit.IntegerEdit("offset: ", "2")
-
-        # Inizializzazione del nuovo controllo
-        self.horizontal_offset = urwid.numedit.IntegerEdit(
-            "Horizontal offset: ", "2"
-        )  # Nuovo controllo
+        self.horizontal_offset = urwid.numedit.IntegerEdit("horizontal offset: ", "2")
+        self.invert_horizontal = checkbox(
+            "invert horizontal", self.invert_horizontal_l
+        )  # Checkbox per invertire l'asse orizzontale
 
         self.save = button("save", save)
         self.save_as = button("save as", save_as)
         self.delete = button("delete", delete)
         self.columns = urwid.Columns([self.save, self.save_as, self.delete])
 
-        # Aggiunta del nuovo controllo alla lista di widget
-        self.listbox = urwid.ListBox(
-            [
-                self.activate,
-                self.ads,
-                self.delay,
-                self.offset,
-                self.horizontal_offset,
-                urwid.Divider(),
-                self.columns,
-            ]
-        )
+        self.listbox = urwid.ListBox([
+            self.activate,
+            self.ads,
+            self.delay,
+            self.offset,
+            self.horizontal_offset,
+            self.invert_horizontal,  # Aggiungiamo la checkbox alla lista dei widget
+            urwid.Divider(),
+            self.columns,
+        ])
 
         self._w = self.listbox
 
-        # Connessione dei segnali
         urwid.connect_signal(self.delay, "change", self.delay_l)
         urwid.connect_signal(self.offset, "change", self.offset_l)
-        urwid.connect_signal(
-            self.horizontal_offset, "change", self.horizontal_offset_l
-        )  # Connessione del nuovo controllo
+        urwid.connect_signal(self.horizontal_offset, "change", self.horizontal_offset_l)
 
         self.thread = Thread(target=self.loop.start, daemon=False, name="nrtui-loop")
         self.thread.start()
 
     def load(self, d):
         self.ads.set_state(d["ads"])
-        self.delay.set_edit_text(str(d["delay"]))  # Converti il valore in stringa
-        self.offset.set_edit_text(str(d["offset"]))  # Converti il valore in stringa
-        self.horizontal_offset.set_edit_text(
-            str(d.get("horizontal_offset", "2"))
-        )  # Converti il valore in stringa
+        self.delay.set_edit_text(str(d["delay"]))
+        self.offset.set_edit_text(str(d["offset"]))
+        self.horizontal_offset.set_edit_text(str(d.get("horizontal_offset", "2")))
+        self.invert_horizontal.set_state(
+            d.get("invert_horizontal", False)
+        )  # Carica lo stato della checkbox
 
     def get_current(self):
         ads = self.ads.get_state()
         delay = self.delay.get_edit_text()
         offset = self.offset.get_edit_text()
-        horizontal_offset = self.horizontal_offset.get_edit_text()  # Nuovo parametro
-        return ads, delay, offset, horizontal_offset
+        horizontal_offset = self.horizontal_offset.get_edit_text()
+        invert_horizontal = (
+            self.invert_horizontal.get_state()
+        )  # Ottieni lo stato della checkbox
+        return ads, delay, offset, horizontal_offset, invert_horizontal
 
     # Loop
     def activate_l(self, _, s):
@@ -119,7 +116,10 @@ class LeftSide(urwid.WidgetWrap):
 
     def horizontal_offset_l(self, _, i):
         if i != "":
-            self.loop.horizontal_offset = i  # Associa il nuovo parametro al loop
+            self.loop.horizontal_offset = i
+
+    def invert_horizontal_l(self, _, state):
+        self.loop.invert_horizontal = state  # Imposta lo stato nel loop
 
 
 class RightSide(urwid.WidgetWrap):
@@ -130,9 +130,9 @@ class RightSide(urwid.WidgetWrap):
         self._w = self.listbox
 
     def update(self, json):
-        self.listbox = urwid.ListBox(
-            [CustomButton(v, self.fn, v) for k, v in enumerate(json.conf)]
-        )
+        self.listbox = urwid.ListBox([
+            CustomButton(v, self.fn, v) for k, v in enumerate(json.conf)
+        ])
 
         self._w = self.listbox
 
@@ -147,12 +147,10 @@ class MainWindow(urwid.WidgetWrap):
         self.left = LeftSide(self.save, self.save_as, self.delete)
         self.right = RightSide(self.click)
 
-        self.columns = urwid.Columns(
-            [
-                ("fixed", 35, urwid.LineBox(self.left)),
-                urwid.LineBox(self.right),
-            ]
-        )
+        self.columns = urwid.Columns([
+            ("fixed", 35, urwid.LineBox(self.left)),
+            urwid.LineBox(self.right),
+        ])
 
         self._w = self.columns
 
@@ -162,10 +160,10 @@ class MainWindow(urwid.WidgetWrap):
         self.initialize()
 
     def save(self, _, __):
-        a, d, o, h = (
+        a, d, o, h, i = (
             self.left.get_current()
         )  # Aggiorna la funzione per includere il nuovo parametro
-        self.json.add(self.loaded, a, d, o, h)
+        self.json.add(self.loaded, a, d, o, h, i)
 
     def save_as(self, _, __):
         self._w = urwid.Overlay(
@@ -181,10 +179,10 @@ class MainWindow(urwid.WidgetWrap):
 
     def exit_save_overlay(self, _, t):
         if t == "save":
-            a, d, o, h = (
+            a, d, o, h, i = (
                 self.left.get_current()
             )  # Aggiorna la funzione per includere il nuovo parametro
-            self.json.add(self.saveoverlay.get_text(), a, d, o, h)
+            self.json.add(self.saveoverlay.get_text(), a, d, o, h, i)
             self.right.update(self.json)
             self._w = self.columns
             self.saveoverlay.edit.set_edit_text("")

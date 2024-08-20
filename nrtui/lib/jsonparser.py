@@ -12,14 +12,21 @@ class JsonConfig:
             self.conf = json.load(file)
 
     def add(
-        self, name: str, ads: bool, delay: str, offset: str, horizontal_offset: str
+        self,
+        name: str,
+        ads: bool,
+        delay: str,
+        offset: str,
+        horizontal_offset: str,
+        invert_horizontal: bool,
     ):
         if self.conf is not None:
             self.conf[name] = {
                 "ads": ads,
                 "delay": delay,
                 "offset": offset,
-                "horizontal_offset": horizontal_offset,  # Nuovo parametro
+                "horizontal_offset": horizontal_offset,
+                "invert_horizontal": invert_horizontal,  # Salva lo stato dell'inversione
             }
         self.write()
 
