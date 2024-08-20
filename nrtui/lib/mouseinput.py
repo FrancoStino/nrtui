@@ -9,8 +9,12 @@ class TimeVal(Structure):
 
 
 class InputEvent(Structure):
-    _fields_ = [("time", TimeVal), ("type", c_uint16),
-                ("code", c_uint16), ("value", c_int)]
+    _fields_ = [
+        ("time", TimeVal),
+        ("type", c_uint16),
+        ("code", c_uint16),
+        ("value", c_int),
+    ]
 
 
 class MouseInput:
@@ -18,9 +22,8 @@ class MouseInput:
         self.handle = -1
         device_name = "event-mouse"
         for device in os.listdir("/dev/input/by-path/"):
-            if device[-device_name.__len__():] == device_name:
-                self.handle = os.open(
-                    "/dev/input/by-path/" + device, os.O_WRONLY)
+            if device[-device_name.__len__() :] == device_name:
+                self.handle = os.open("/dev/input/by-path/" + device, os.O_WRONLY)
                 return
         raise Exception("Input [" + device_name + "] not found!")
 
@@ -41,3 +44,8 @@ class MouseInput:
 
     def move(self, y):
         self.__send_input(0x02, 1, y)
+
+    def move_horizontal(self, x):
+        self.__send_input(
+            0x02, 0, x
+        )  # 0x02 è l'evento per movimento, 0 è il codice per l'asse X
