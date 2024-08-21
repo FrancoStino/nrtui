@@ -82,12 +82,12 @@ class LeftSide(urwid.WidgetWrap):
 
     def load(self, d):
         self.ads.set_state(d["ads"])
-        self.delay.set_edit_text(str(d["delay"]))
-        self.offset.set_edit_text(str(d["offset"]))
-        self.horizontal_offset.set_edit_text(str(d.get("horizontal_offset", "2")))
-        self.invert_horizontal.set_state(
-            d.get("invert_horizontal", False)
-        )  # Carica lo stato della checkbox
+        self.delay.set_edit_text(str(float(d["delay"])))  # Converti in stringa
+        self.offset.set_edit_text(str(float(d["offset"])))  # Converti in stringa
+        self.horizontal_offset.set_edit_text(
+            str(float(d["horizontal_offset"]))
+        )  # Converti in stringa
+        self.invert_horizontal.set_state(d["invert_horizontal"])
 
     def get_current(self):
         ads = self.ads.get_state()

@@ -23,13 +23,15 @@ class Loop:
                     if mouse.is_pressed(button="left"):
                         # Determina la direzione dell'offset orizzontale
                         horizontal_movement = (
-                            -int(self.horizontal_offset)
+                            -int(float(self.horizontal_offset))
                             if self.invert_horizontal
-                            else int(self.horizontal_offset)
+                            else int(float(self.horizontal_offset))
                         )
 
                         # Muove il mouse sia in verticale che in orizzontale
-                        self.mouseinput.move(int(self.offset), horizontal_movement)
+                        self.mouseinput.move(
+                            int(float(self.offset)), horizontal_movement
+                        )
 
                         # Ritardo tra i movimenti
                         time.sleep(float(self.delay) / 100)
@@ -37,13 +39,13 @@ class Loop:
                 if mouse.is_pressed(button="left"):
                     # Determina la direzione dell'offset orizzontale
                     horizontal_movement = (
-                        -int(self.horizontal_offset)
+                        -int(float(self.horizontal_offset))
                         if self.invert_horizontal
-                        else int(self.horizontal_offset)
+                        else int(float(self.horizontal_offset))
                     )
 
                     # Muove il mouse sia in verticale che in orizzontale
-                    self.mouseinput.move(int(self.offset), horizontal_movement)
+                    self.mouseinput.move(int(float(self.offset)), horizontal_movement)
 
                     # Ritardo tra i movimenti
                     time.sleep(float(self.delay) / 100)
