@@ -10,10 +10,10 @@ Simple no recoil script for Linux which writes into your input device directly, 
 
 ## About
 
-- no recoil script
-- preset system
-- presets are stored in "~/.config/nrtui"
-- use Ctrl + X to exit
+-   no recoil script
+-   preset system
+-   presets are stored in "~/.config/nrtui"
+-   use Ctrl + X to exit
 
 ## Installation
 
@@ -26,6 +26,12 @@ git clone https://github.com/V2BlockBuster2K/nrtui.git
 cd nrtui
 pip install .
 nrtui
+```
+
+OR
+
+```sh
+sudo -E python3 -m nrtui.nrtui
 ```
 
 ## License
